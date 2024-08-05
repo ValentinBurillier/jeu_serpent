@@ -6,6 +6,7 @@ window.onload = function() {
   let ctx;
   let delay = 100;
   let snakee;
+  let applee;
   
   init();
 
@@ -23,6 +24,7 @@ window.onload = function() {
     // CREATE SNAKE WITH A BODY
     snakee = new Snake([[6,4], [5,4], [4,4]], "right"); // Taille /représentation du serpent au début en longueur de blocks aux coordonnes x et y
     // le serpent allant de gauche à droite, [6,4] correspond à la tête du serpent
+    applee = new Apple([10,10]);
     refreshCanvas();
   }
 
@@ -30,6 +32,7 @@ window.onload = function() {
     ctx.clearRect(0,0,canvasWidth, canvasHeight); // On efface entièrement le canvas pour faire propre et éviter des traces lors de chaque dessin du serpent lorqu'ila avance.
     snakee.draw(); // Je dessine mon serpent
     snakee.advance(); // Je fais avancer mon serpent
+    applee.draw();
     setTimeout(refreshCanvas, delay); // je relancer la fonction : effacage + creation du serpent + avancer
   }
 
@@ -99,6 +102,23 @@ window.onload = function() {
       }
     }
   }
+
+  // Ajouter la pomme
+  function Apple(position) {
+    this.position = position;
+    this.draw = function() {
+      ctx.save();
+      ctx.fillStyle = "#33cc33";
+      ctx.beginPath();
+      let radius = blockSize/2;
+      let x = position[0]*blockSize + radius;
+      let y = position[1]*blockSize + radius;
+      ctx.arc(x,y,radius, 0, Math.PI*2, true);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
   document.onkeydown = function handleKeyDown(e) { // Détecter l'appuie sur une touche par l'utilisateur
     let key = e.keyCode; // stock code touche dans la variable
     let newDirection;
