@@ -7,6 +7,8 @@ window.onload = function() {
   let delay = 100;
   let snakee;
   let applee;
+  let widthInBlocks = canvasWidth/blockSize;
+  let heightInBlocks = canvasHeight/blockSize;
   
   init();
 
@@ -29,11 +31,16 @@ window.onload = function() {
   }
 
   function refreshCanvas() {
-    ctx.clearRect(0,0,canvasWidth, canvasHeight); // On efface entièrement le canvas pour faire propre et éviter des traces lors de chaque dessin du serpent lorqu'ila avance.
-    snakee.draw(); // Je dessine mon serpent
-    snakee.advance(); // Je fais avancer mon serpent
-    applee.draw();
-    setTimeout(refreshCanvas, delay); // je relancer la fonction : effacage + creation du serpent + avancer
+    if(snakee.checkCollision()) {
+
+    } else {
+      ctx.clearRect(0,0,canvasWidth, canvasHeight); // On efface entièrement le canvas pour faire propre et éviter des traces lors de chaque dessin du serpent lorqu'ila avance.
+      snakee.draw(); // Je dessine mon serpent
+      snakee.advance(); // Je fais avancer mon serpent
+      applee.draw();
+      setTimeout(refreshCanvas, delay); // je relancer la fonction : effacage + creation du serpent + avancer
+    }
+
   }
 
   // Dessine un bloc / une partie du serpent
@@ -100,6 +107,31 @@ window.onload = function() {
       if(allowedDirections.indexOf(newDirection) > -1) {
         this.direction = newDirection;
       }
+    }
+    this.checkCollision = function() {
+      let wallCollision = false;
+      let snakeCollision = false;
+      let head = this.body[0];
+      let rest = this.body.slice(1);
+      let snakeX = head[0];
+      let snakeY = head[1];
+      let minX = 0;
+      let minY = 0;
+      let maxX = widthInBlocks - 1;
+      let maxY = heightInBlocks - 1;
+      let isNotBetweenHorizontalWalls = snakeX < minX || snakeX > maxX;
+      let isNotBetweenVerticalWalls = snakeY < minY || snakeY > maxY;
+
+      if(isNotBetweenHorizontalWalls || isNotBetweenVerticalWalls) {
+        wallCollision = true;
+      }
+      for(let i = 0; i < rest.length; i++) {
+        if(snakeX === rest[i][0] && snakeY === rest[i][1]) {
+          snakeCollision = true;
+        }
+      }
+
+      return wallCollision || snakeCollision;
     }
   }
 
