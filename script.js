@@ -4,7 +4,7 @@ window.onload = function() {
   let canvasHeight = 600;
   let blockSize = 30;
   let ctx;
-  let delay = 100;
+  let delay = 200;
   let snakee;
   let applee;
   let widthInBlocks = canvasWidth/blockSize;
@@ -34,6 +34,13 @@ window.onload = function() {
     if(snakee.checkCollision()) {
 
     } else {
+      if(snakee.isEatingApple(applee)) {
+        snakee.ateApple = true;
+        do {
+          applee.setNewPosition();
+        }
+        while(applee.isOnSnake(snakee));
+      }
       ctx.clearRect(0,0,canvasWidth, canvasHeight); // On efface entièrement le canvas pour faire propre et éviter des traces lors de chaque dessin du serpent lorqu'ila avance.
       snakee.draw(); // Je dessine mon serpent
       snakee.advance(); // Je fais avancer mon serpent
@@ -55,6 +62,7 @@ window.onload = function() {
   function Snake(body, direction) {
     this.body = body; // body block width
     this.direction = direction;
+    this.ateApple = false;
     // DRAW DESSINE LE SERPENT SUR LE CANVAS
     this.draw = function() { 
       ctx.save(); // sauvegarde l'état actuel du contexte de dessin (couleurs, transformations, etc) ici il s'agit des valeurs initiales
@@ -88,7 +96,12 @@ window.onload = function() {
       }
       // nextPosition[0] += 1; // [7,4]
       this.body.unshift(nextPosition); // now [[7,4], [6,4], [5,4], [4,4]]
-      this.body.pop(); // now [[7,4], [6,4], [5,4]]
+      if(!this.ateApple) {
+        this.body.pop(); // now [[7,4], [6,4], [5,4]]
+      } else {
+        this.ateApple = false;
+      }
+      
     };
     this.setDirection = function(newDirection) {
       let allowedDirections;
@@ -132,7 +145,15 @@ window.onload = function() {
       }
 
       return wallCollision || snakeCollision;
-    }
+    };
+    this.isEatingApple = function(appleToEat) {
+      let head = this.body[0];
+      if(head[0] === appleToEat.position[0] && head[1] === appleToEat.position[1]) {
+        return true;
+      } else {
+        return false;
+      }
+    };
   }
 
   // Ajouter la pomme
@@ -143,11 +164,25 @@ window.onload = function() {
       ctx.fillStyle = "#33cc33";
       ctx.beginPath();
       let radius = blockSize/2;
-      let x = position[0]*blockSize + radius;
-      let y = position[1]*blockSize + radius;
+      let x = this.position[0]*blockSize + radius;
+      let y = this.position[1]*blockSize + radius;
       ctx.arc(x,y,radius, 0, Math.PI*2, true);
       ctx.fill();
       ctx.restore();
+    };
+    this.setNewPosition = function() {
+      let newX = Math.round(Math.random() * (widthInBlocks -1));
+      let newY = Math.round(Math.random() * (heightInBlocks -1));
+      this.position = [newX, newY];
+    };
+    this.isOnSnake = function(snakeToCheck) {
+      let isOnSnake = false;
+      for(let i = 0; i < snakeToCheck.body.length; i++) {
+        if(this.position[0] === snakeToCheck.body[i][0] && this.position[1] === snakeToCheck.body[i][1]) {
+          isOnSnake = true;
+        }
+      }
+      return isOnSnake;
     }
   }
 
